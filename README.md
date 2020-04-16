@@ -12,3 +12,9 @@
     `python run.py`
 
 3. Go to http://0.0.0.0:3001/
+
+or run:
+
+python data/process_data.py data/disaster_messages.csv data/disaster_categories.csv data/DisasterResponse.db && python models/train_classifier.py data/DisasterResponse.db models/classifier.pkl && app/python run.py
+
+and then go to Go to http://0.0.0.0:3001/
