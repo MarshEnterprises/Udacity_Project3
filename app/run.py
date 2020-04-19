@@ -15,6 +15,13 @@ from sqlalchemy import create_engine
 app = Flask(__name__)
 
 def tokenize(text):
+    '''
+    Remove stopwords, lemmatize, lower, strip and tokenize text data.
+    :param text - string:
+        string to tokenize
+    :return:
+        tokenized string
+    '''
     tokens = word_tokenize(text)
     lemmatizer = WordNetLemmatizer()
 
@@ -26,7 +33,6 @@ def tokenize(text):
     return clean_tokens
 
 # load data
-#engine = create_engine('sqlite:///../data/YourDatabaseName.db')
 engine = create_engine('sqlite:///../data/DisasterResponse.db')
 df = pd.read_sql_table('YourTableName', engine)
 
@@ -40,33 +46,67 @@ model = joblib.load("../models/classifier.pkl", 'rb')
 def index():
     
     # extract data needed for visuals
-    # TODO: Below is an example - modify to extract data for your own visuals
     genre_counts = df.groupby('genre').count()['message']
     genre_names = list(genre_counts.index)
-    
+
+    category_list = ['related', 'request', 'offer',
+       'aid_related', 'medical_help', 'medical_products', 'search_and_rescue',
+       'security', 'military', 'child_alone', 'water', 'food', 'shelter',
+       'clothing', 'money', 'missing_people', 'refugees', 'death', 'other_aid',
+       'infrastructure_related', 'transport', 'buildings', 'electricity',
+       'tools', 'hospitals', 'shops', 'aid_centers', 'other_infrastructure',
+       'weather_related', 'floods', 'storm', 'fire', 'earthquake', 'cold',
+       'other_weather', 'direct_report']
+
+    category_sum = df[category_list].sum()
+
+
     # create visuals
-    # TODO: Below is an example - modify to create your own visuals
     graphs = [
+
         {
+
+
             'data': [
                 Bar(
-                    x=genre_names,
-                    y=genre_counts
+                    x=category_list,
+                    y=category_sum,
+
                 )
             ],
 
             'layout': {
-                'title': 'Distribution of Message Genres',
+                'title': 'Number of Messages per Classification in the Training Data',
                 'yaxis': {
                     'title': "Count"
                 },
                 'xaxis': {
-                    'title': "Genre"
+                    'title': "Training Classes"
                 }
             }
-        }
+        },
+             {
+
+                 'data': [
+                     Bar(
+                         x=genre_names,
+                         y=genre_counts
+                     )
+                 ],
+
+                 'layout': {
+                     'title': 'Distribution of Message Genres',
+                     'yaxis': {
+                         'title': "Count"
+                     },
+                     'xaxis': {
+                         'title': "Genre"
+                     }
+                 }
+             }
     ]
-    
+
+
     # encode plotly graphs in JSON
     ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
     graphJSON = json.dumps(graphs, cls=plotly.utils.PlotlyJSONEncoder)
@@ -94,6 +134,7 @@ def go():
 
 
 def main():
+    '''run web app'''
     app.run(host='0.0.0.0', port=3001, debug=True)
 
 
